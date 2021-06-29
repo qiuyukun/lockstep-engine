@@ -1,0 +1,17 @@
+{
+    "name": "Lockstep.Demo",
+    "references": [
+        "GUID:fcbcdcaf92ff34a72ac440a2db28056c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [
+        "Editor"
+    ],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

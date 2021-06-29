@@ -1,0 +1,23 @@
+{
+    "name": "Lockstep.Test",
+    "rootNamespace": "",
+    "references": [
+        "GUID:fcbcdcaf92ff34a72ac440a2db28056c",
+        "GUID:0acc523941302664db1f4e527237feb3",
+        "GUID:27619889b8ba8c24980f49ee34dbb44a",
+        "GUID:679e26bd9214f7a4abf5b6085dce7cc6"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
