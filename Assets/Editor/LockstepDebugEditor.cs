@@ -39,7 +39,6 @@ namespace Lockstep.Editor
         {
             base.OnInspectorGUI();
             EditorGUILayout.Space();
-
             var engine = _debug.engine;
             var engineType = engine.GetType();
             var timeOffset = (long)_timeOffestField.GetValue(engine);

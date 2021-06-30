@@ -20,6 +20,7 @@ namespace Lockstep
         public bool isRunning { get; private set; }
         //逻辑帧间隔毫秒
         public uint frameDeltaTime => 33;
+
         //时间校准值(外部预估ping值等)
         public volatile int timeAdjust = 0;
         //是否可以预测
@@ -88,8 +89,8 @@ namespace Lockstep
             isRunning = false;
             _logicThread?.Join();
             _logicThread = null;
-            _confirmedInputQueue.Clear();
-            _predictiveInputQueue.Clear();
+            _confirmedInputQueue = null;
+            _predictiveInputQueue = null;
             _startStopwatch = null;
 #if UNITY_EDITOR
             //if (_debug != null)

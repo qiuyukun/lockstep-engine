@@ -3,9 +3,6 @@
 // Date:2019-07-24 11:44:10
 // ==============================================
 
-using UnityEngine;
-using System.Collections;
-
 namespace Fixed
 {
     /// <summary>

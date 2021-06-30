@@ -8228,7 +8228,7 @@ namespace Fixed
 			};
 		}
 
-		public static int getIndex(long nom, long den)
+		public static int GetIndex(long nom, long den)
 		{
 			//分子乘以10000 以及 离散的数值的个数
 			nom *= (long)FixedSinCosTable.NOM_MUL;

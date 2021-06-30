@@ -6,7 +6,7 @@
 namespace Fixed
 {
     /// <summary>
-    /// 定点数Q47.16
+    /// 64位定点数(小数截取,16位小数位)
     /// </summary>
     public struct FixedPoint64
     {

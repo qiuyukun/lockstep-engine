@@ -130,14 +130,14 @@ namespace Fixed
         public static FixedPoint64 Sin(FixedPoint64 sinVal)
         {
             //索引值求的原理见对应函数内注释 
-            int index = FixedSinCosTable.getIndex(sinVal.RawValue, FixedPoint64.FRACTION_RANGE);
+            int index = FixedSinCosTable.GetIndex(sinVal.RawValue, FixedPoint64.FRACTION_RANGE);
             return new FixedPoint64(FixedSinCosTable.sin_table[index], PRECISION_FACTOR);
         }
 
         public static FixedPoint64 Cos(FixedPoint64 cosVal)
         {
             //索引值求的原理见对应函数内注释 
-            int index = FixedSinCosTable.getIndex(cosVal.RawValue, FixedPoint64.FRACTION_RANGE);
+            int index = FixedSinCosTable.GetIndex(cosVal.RawValue, FixedPoint64.FRACTION_RANGE);
             return new FixedPoint64(FixedSinCosTable.cos_table[index], PRECISION_FACTOR);
         }
 
