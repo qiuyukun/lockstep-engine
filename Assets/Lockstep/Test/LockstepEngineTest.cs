@@ -140,7 +140,7 @@ namespace Lockstep.Test
 
         internal EngineEnv()
         {
-            engine = new LockstepEngine(Excute, Rollback, GetInput);
+            engine = new LockstepEngine(Excute, Rollback, Predict);
             engine.Start(false);
         }
 
@@ -167,7 +167,7 @@ namespace Lockstep.Test
             NUnit.Framework.Assert.True(_dataDict.TryGetValue(frame, out _data));
         }
 
-        private IFrameInput GetInput()
+        private IFrameInput Predict()
         {
             var input = new TestInput();
             input.frameIndex = engine.predictiveFrameIndex;

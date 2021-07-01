@@ -35,28 +35,20 @@ namespace Lockstep
         private Queue<IFrameInput> _predictiveInputQueue;
         private Queue<IFrameInput> _confirmedInputQueue;
         private Action<IFrameInput> _excuteCallback;
-        private Func<IFrameInput> _getInputAction;
+        private Func<IFrameInput> _predictAction;
         private Action<int> _rollback;
         private Thread _logicThread;
         private Stopwatch _startStopwatch;
         private long _timeOffset;
         private object _inputLock = new object();
 
-#if UNITY_EDITOR
-        //private LockstepDebug _debug;
-#endif
-
-        public LockstepEngine(Action<IFrameInput> excuteCallback, Action<int> rollback = null, Func<IFrameInput> getInputAction = null)
+        public LockstepEngine(Action<IFrameInput> excuteCallback, Action<int> rollback = null, Func<IFrameInput> predictAction = null)
         {
             _predictiveInputQueue = new Queue<IFrameInput>(_maxPredictionCount);
             _confirmedInputQueue = new Queue<IFrameInput>(_maxPredictionCount);
             _excuteCallback = excuteCallback;
-            _getInputAction = getInputAction;
+            _predictAction = predictAction;
             _rollback = rollback;
-#if UNITY_EDITOR
-            //_debug = new UnityEngine.GameObject("LockstepDebug").AddComponent<LockstepDebug>();
-            //_debug.Init(this);
-#endif 
         }
 
         public void Start(bool newThread = true)
@@ -92,10 +84,6 @@ namespace Lockstep
             _confirmedInputQueue = null;
             _predictiveInputQueue = null;
             _startStopwatch = null;
-#if UNITY_EDITOR
-            //if (_debug != null)
-            //    UnityEngine.GameObject.Destroy(_debug.gameObject);
-#endif
         }
 
         public void OnInput(IFrameInput input)
@@ -158,14 +146,7 @@ namespace Lockstep
                         //回滚
                         if (!isRollBack && !predictiveInput.Equals(confirmedInput))
                         {
-#if UNITY_EDITOR
-                            //_debug?.BeginRollback();
-#endif
                             _rollback?.Invoke(confirmedFrameIndex);
-
-#if UNITY_EDITOR
-                            //_debug?.EndRollback();
-#endif
                             isRollBack = true;
                         }
                     }
@@ -205,7 +186,7 @@ namespace Lockstep
         private void Predict()
         {
             predictiveFrameIndex += 1;
-            var input = _getInputAction?.Invoke();
+            var input = _predictAction?.Invoke();
             input.frameIndex = predictiveFrameIndex;
             _predictiveInputQueue.Enqueue(input);
             Excute(input);
@@ -214,13 +195,8 @@ namespace Lockstep
         private void Excute(IFrameInput input)
         {
             if (input == null) return;
-#if UNITY_EDITOR
-            //_debug?.BeginExcute();
-#endif
             _excuteCallback?.Invoke(input);
-#if UNITY_EDITOR
-            //_debug?.EndExcute();
-#endif
+
         }
     }
 }
