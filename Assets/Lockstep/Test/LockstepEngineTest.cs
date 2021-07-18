@@ -5,7 +5,6 @@
 
 using System.Collections.Generic;
 using NUnit.Framework;
-using Lockstep;
 
 namespace Lockstep.Test
 {
@@ -126,6 +125,11 @@ namespace Lockstep.Test
             {
                 var o = (TestInput)other;
                 return frameIndex == other.frameIndex && data == o.data;
+            }
+
+            public void Release()
+            {
+                
             }
         }
 

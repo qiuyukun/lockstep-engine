@@ -37,18 +37,20 @@ namespace Lockstep
         private Action<IFrameInput> _excuteCallback;
         private Func<IFrameInput> _predictAction;
         private Action<int> _rollback;
+        private Func<int,int,Queue<IFrameInput>> _pursuePredictiveFrame;
         private Thread _logicThread;
         private Stopwatch _startStopwatch;
         private long _timeOffset;
         private object _inputLock = new object();
 
-        public LockstepEngine(Action<IFrameInput> excuteCallback, Action<int> rollback = null, Func<IFrameInput> predictAction = null)
+        public LockstepEngine(Action<IFrameInput> excuteCallback, Action<int> rollback = null, Func<IFrameInput> predictAction = null, Func<int, int, Queue<IFrameInput>> pursuePredictiveFrame = null)
         {
             _predictiveInputQueue = new Queue<IFrameInput>(_maxPredictionCount);
             _confirmedInputQueue = new Queue<IFrameInput>(_maxPredictionCount);
             _excuteCallback = excuteCallback;
             _predictAction = predictAction;
             _rollback = rollback;
+            _pursuePredictiveFrame = pursuePredictiveFrame;
         }
 
         public void Start(bool newThread = true)
@@ -79,13 +81,17 @@ namespace Lockstep
         public void Close()
         {
             isRunning = false;
-            _logicThread?.Join();
+            _logicThread?.Join(2000);
             _logicThread = null;
             _confirmedInputQueue = null;
             _predictiveInputQueue = null;
             _startStopwatch = null;
         }
 
+        /// <summary>
+        /// 确认帧输入,必须按照帧顺序输入
+        /// </summary>
+        /// <param name="input"></param>
         public void OnInput(IFrameInput input)
         {
             if (_startStopwatch != null)
@@ -103,10 +109,26 @@ namespace Lockstep
             }
         }
 
+        /// <summary>
+        /// 执行下一帧
+        /// </summary>
         public void NextStep()
         {
             var time = (predictiveFrameIndex + 1) * frameDeltaTime;
             LogicUpdate(time, 1);
+        }
+
+        /// <summary>
+        /// 重置预测输入队列
+        /// </summary>
+        /// <param name="inputQueue"></param>
+        public void ResetPredictiveInputQueue(Queue<IFrameInput> inputQueue)
+        {
+            _predictiveInputQueue.Clear();
+            foreach (var item in inputQueue)
+            {
+                _predictiveInputQueue.Enqueue(item);
+            }
         }
 
         private long GetPredictTime()
@@ -130,8 +152,9 @@ namespace Lockstep
 
         private void LogicUpdate(long time, int maxLogicCount)
         {
-            bool isRollBack = false;
-            int logicCount = 0;
+            var isRollBack = false;
+            var isPursuePredictiveFrame = true;
+            var logicCount = 0;
 
             lock (_inputLock)
             {
@@ -149,34 +172,55 @@ namespace Lockstep
                             _rollback?.Invoke(confirmedFrameIndex);
                             isRollBack = true;
                         }
+                        predictiveInput.Release();
                     }
                     else
                         Excute(confirmedInput);
 
                     if (isRollBack)
                         Excute(confirmedInput);
+                    confirmedInput.Release();
+                }
+                if (_confirmedInputQueue.Count > 0)
+                {
+                    isPursuePredictiveFrame = false;
                 }
             }
 
             if (confirmedFrameIndex > predictiveFrameIndex)
                 predictiveFrameIndex = confirmedFrameIndex;
 
-            if (isRollBack)
+            //追上预测帧
+            if (isRollBack && isPursuePredictiveFrame && confirmedFrameIndex < predictiveFrameIndex)
             {
-                var count = _predictiveInputQueue.Count;
-                //追上预测帧
-                while (count > 0)
+                foreach (var item in _predictiveInputQueue)
                 {
-                    var input = _predictiveInputQueue.Dequeue();
+                    item.Release();
+                }
+                _predictiveInputQueue.Clear();
+
+                var inputQueue = _pursuePredictiveFrame.Invoke(confirmedFrameIndex + 1, predictiveFrameIndex);
+                for (int i = confirmedFrameIndex + 1; i <= predictiveFrameIndex; i++)
+                {
+                    var input = inputQueue.Dequeue();
                     Excute(input);
                     _predictiveInputQueue.Enqueue(input);
-                    count--;
                 }
+
+                //var count = _predictiveInputQueue.Count;
+                //while (count > 0)
+                //{
+                //    var input = _predictiveInputQueue.Dequeue();
+                //    Excute(input);
+                //    _predictiveInputQueue.Enqueue(input);
+                //    count--;
+                //}
             }
 
             //预测
-            if (predictiveFrameIndex < confirmedFrameIndex + _maxPredictionCount &&
-                time >= (predictiveFrameIndex + 1) * frameDeltaTime)
+            if (_confirmedInputQueue.Count == 0 
+                && predictiveFrameIndex < confirmedFrameIndex + _maxPredictionCount
+                && time >= (predictiveFrameIndex + 1) * frameDeltaTime)
             {
                 Predict();
             }
@@ -196,7 +240,6 @@ namespace Lockstep
         {
             if (input == null) return;
             _excuteCallback?.Invoke(input);
-
         }
     }
 }

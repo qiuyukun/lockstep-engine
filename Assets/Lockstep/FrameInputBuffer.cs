@@ -10,78 +10,9 @@ namespace Lockstep
     //每帧输入
     public interface IFrameInput
     {
-        bool Equals(IFrameInput other);
         int frameIndex { get; set; }
+        bool Equals(IFrameInput other);
+        void Release();
     }
-
-    //输入缓存
-    //public class FrameInputBuffer
-    //{
-    //    public int lastIndex { get; private set; } = -1;
-    //    private IFrameInput[] _inputs;
-    //    private object _lock = new object();
-
-    //    public FrameInputBuffer(int count = 36000)
-    //    {
-    //        _inputs = new IFrameInput[count];
-    //    }
-
-    //    public void AddInput(IFrameInput input)
-    //    {
-    //        var index = input.frameIndex;
-    //        if (index < 0)
-    //        {
-    //            throw new Exception("index must be non-negative");
-    //        }
-    //        lock (_lock)
-    //        {
-    //            if (index >= _inputs.Length)
-    //            {
-    //                var length = _inputs.Length * 2;
-    //                var old = _inputs;
-    //                _inputs = new IFrameInput[length];
-    //                for (int i = 0; i < old.Length; i++)
-    //                    _inputs[i] = old[i];
-    //            }
-
-    //            if (_inputs[index] == default(IFrameInput))
-    //            {
-    //                _inputs[index] = input;
-    //                if (index == lastIndex + 1)
-    //                {
-    //                    while (index + 1 < _inputs.Length && _inputs[index + 1] != null)
-    //                    {
-    //                        index++;
-    //                    }
-    //                    lastIndex = index;
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    public bool TryGetIndex(int index, out IFrameInput input)
-    //    {
-    //        lock (_lock)
-    //        {
-    //            if (index < 0 || index >= _inputs.Length)
-    //            {
-    //                input = null;
-    //                return false;
-    //            }
-    //            input = _inputs[index];
-    //        }
-    //        return input != null;
-    //    }
-
-    //    public bool Equals(int index, IFrameInput input)
-    //    {
-    //        IFrameInput self;
-    //        if (TryGetIndex(index, out self))
-    //        {
-    //            return self.Equals(input);
-    //        }
-    //        return true;
-    //    }
-    //}
 }
 
